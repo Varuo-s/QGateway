@@ -423,3 +423,132 @@ button {
   border-color: rgba(248, 113, 113, 0.28);
   background: rgba(127, 29, 29, 0.2);
 }
+
+.playground-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px;
+}
+
+.chat-panel {
+  min-height: calc(100vh - 136px);
+  display: flex;
+  flex-direction: column;
+}
+
+.message-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 420px;
+  max-height: calc(100vh - 360px);
+  overflow: auto;
+  padding: 6px 2px 18px;
+}
+
+.message-bubble {
+  max-width: 78%;
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.message-bubble.user {
+  align-self: flex-end;
+  background: rgba(56, 189, 248, 0.16);
+}
+
+.message-bubble.assistant {
+  align-self: flex-start;
+}
+
+.message-bubble.error-message {
+  align-self: stretch;
+  max-width: 100%;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.24);
+}
+
+.message-bubble span {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(226, 232, 240, 0.68);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.message-bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.composer textarea,
+.parameter-panel textarea,
+.parameter-panel input[type="number"] {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  color: #eff6ff;
+  background: rgba(255, 255, 255, 0.09);
+  outline: none;
+}
+
+.composer textarea {
+  min-height: 86px;
+  resize: vertical;
+  padding: 14px;
+}
+
+.send-button {
+  min-width: 96px;
+  height: 48px;
+}
+
+.send-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.parameter-panel {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+.parameter-panel label {
+  display: grid;
+  gap: 8px;
+  color: rgba(226, 232, 240, 0.78);
+}
+
+.parameter-panel input[type="range"] {
+  accent-color: #38bdf8;
+}
+
+.parameter-panel input[type="number"] {
+  padding: 10px 12px;
+}
+
+.small-textarea {
+  min-height: 120px;
+  resize: vertical;
+  padding: 12px;
+}
+
+@media (max-width: 1280px) {
+  .playground-layout {
+    grid-template-columns: 1fr;
+  }
+}
