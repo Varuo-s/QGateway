@@ -7,6 +7,7 @@ logs:
   file: logs/qgateway.log
 models:
   scan_paths:
+    - ../Models
     - Models
     - models
     - AI/Models
@@ -15,4 +16,3 @@ launcher:
     - llama-server
     - ollama
     - lmstudio
-

@@ -45,16 +45,17 @@ def scan_models() -> list[ScannedModel]:
     models: list[ScannedModel] = []
 
     for configured_path in settings.models.scan_paths:
-        scan_root: Path = settings.resolve_path(configured_path)
+        scan_root: Path = settings.resolve_path(configured_path).resolve()
         if not scan_root.exists() or not scan_root.is_dir():
             continue
 
-        for model_path in scan_root.rglob("*.gguf"):
+        for discovered_path in scan_root.rglob("*.gguf"):
+            model_path = discovered_path.resolve()
             if not model_path.is_file():
                 continue
             stat = model_path.stat()
             try:
-                relative_path = str(model_path.relative_to(settings.project_root))
+                relative_path = str(model_path.relative_to(settings.project_root.resolve()))
             except ValueError:
                 relative_path = str(model_path)
 
@@ -72,3 +73,5 @@ def scan_models() -> list[ScannedModel]:
             )
 
     return sorted(models, key=lambda item: item["name"].lower())
+
+

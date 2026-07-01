@@ -20,7 +20,7 @@ class LogSettings(BaseModel):
 
 
 class ModelSettings(BaseModel):
-    scan_paths: list[str] = Field(default_factory=lambda: ["Models", "models", "AI/Models"])
+    scan_paths: list[str] = Field(default_factory=lambda: ["../Models", "Models", "models", "AI/Models"])
 
 
 class LauncherSettings(BaseModel):
@@ -62,3 +62,4 @@ def load_settings(config_path: Path | None = None) -> Settings:
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return load_settings()
+
