@@ -1,7 +1,7 @@
 ﻿gateway:
   host: 127.0.0.1
   port: 4000
-  version: alpha-0.1
+  version: alpha-0.2
 logs:
   level: INFO
   file: logs/qgateway.log
@@ -15,3 +15,4 @@ launcher:
     - llama-server
     - ollama
     - lmstudio
+

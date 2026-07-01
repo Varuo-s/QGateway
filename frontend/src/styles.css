@@ -318,3 +318,94 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+.models-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-subtitle {
+  margin: 8px 0 0;
+  color: rgba(226, 232, 240, 0.68);
+}
+
+.two-metrics {
+  grid-template-columns: 0.6fr 1.4fr;
+}
+
+.metric-card.compact {
+  min-height: 132px;
+}
+
+.metric-card.compact strong {
+  margin-top: 18px;
+}
+
+.time-value {
+  font-size: 24px !important;
+  letter-spacing: -0.03em !important;
+}
+
+.empty-state {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  color: rgba(226, 232, 240, 0.68);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.model-list {
+  display: grid;
+  gap: 12px;
+}
+
+.model-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.model-main {
+  min-width: 0;
+}
+
+.model-main strong,
+.model-main span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-main strong {
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.model-main span {
+  margin-top: 6px;
+  color: rgba(226, 232, 240, 0.62);
+  font-size: 13px;
+}
+
+.model-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.model-meta span {
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: rgba(239, 246, 255, 0.92);
+  background: rgba(255, 255, 255, 0.11);
+}

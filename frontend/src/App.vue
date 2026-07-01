@@ -42,6 +42,7 @@
 
       <el-main class="content">
         <DashboardView v-if="activeView === 'dashboard'" :health="health" :labels="t.dashboard" />
+        <ModelsView v-else-if="activeView === 'models'" :labels="t.models" />
         <SettingsView v-else-if="activeView === 'settings'" :labels="t.settings" />
         <LogsView v-else :labels="t.logs" />
       </el-main>
@@ -54,10 +55,11 @@ import { computed, onMounted, ref } from "vue";
 import { getJson } from "./api/client";
 import DashboardView from "./views/DashboardView.vue";
 import LogsView from "./views/LogsView.vue";
+import ModelsView from "./views/ModelsView.vue";
 import SettingsView from "./views/SettingsView.vue";
 
 type Language = "zh" | "en";
-type ViewKey = "dashboard" | "settings" | "logs";
+type ViewKey = "dashboard" | "models" | "settings" | "logs";
 type Health = {
   status: string;
   service: string;
@@ -69,11 +71,11 @@ type Health = {
 const dictionaries = {
   zh: {
     subtitle: "开源 AI Runtime",
-    alpha: "Alpha 0.1 · 液态玻璃控制台",
+    alpha: "Alpha 0.2 · 液态玻璃控制台",
     online: "在线",
     checking: "检查中",
     switchLanguage: "EN",
-    nav: { dashboard: "仪表盘", settings: "设置", logs: "日志" },
+    nav: { dashboard: "仪表盘", models: "模型", settings: "设置", logs: "日志" },
     dashboard: {
       backend: "后端服务",
       runtime: "运行状态",
@@ -91,6 +93,21 @@ const dictionaries = {
       detectionOnly: "仅检测",
       unknown: "未知",
       checking: "检查中",
+    },
+    models: {
+      title: "模型",
+      subtitle: "扫描本地 GGUF 模型",
+      rescan: "重新扫描",
+      empty: "没有发现 GGUF 模型。",
+      count: "模型数量",
+      scanTime: "扫描时间",
+      name: "名称",
+      size: "大小",
+      format: "格式",
+      quantization: "量化",
+      path: "路径",
+      unknown: "未知",
+      loading: "正在扫描模型...",
     },
     settings: {
       title: "设置",
@@ -110,11 +127,11 @@ const dictionaries = {
   },
   en: {
     subtitle: "Open Source AI Runtime",
-    alpha: "Alpha 0.1 · Liquid Glass Console",
+    alpha: "Alpha 0.2 · Liquid Glass Console",
     online: "Online",
     checking: "Checking",
     switchLanguage: "中文",
-    nav: { dashboard: "Dashboard", settings: "Settings", logs: "Logs" },
+    nav: { dashboard: "Dashboard", models: "Models", settings: "Settings", logs: "Logs" },
     dashboard: {
       backend: "Backend",
       runtime: "Runtime",
@@ -132,6 +149,21 @@ const dictionaries = {
       detectionOnly: "Detection only",
       unknown: "Unknown",
       checking: "Checking",
+    },
+    models: {
+      title: "Models",
+      subtitle: "Scan local GGUF models",
+      rescan: "Rescan",
+      empty: "No GGUF models found.",
+      count: "Model Count",
+      scanTime: "Scan Time",
+      name: "Name",
+      size: "Size",
+      format: "Format",
+      quantization: "Quantization",
+      path: "Path",
+      unknown: "Unknown",
+      loading: "Scanning models...",
     },
     settings: {
       title: "Settings",
@@ -152,11 +184,13 @@ const dictionaries = {
 } as const;
 
 const activeView = ref<ViewKey>("dashboard");
-const language = ref<Language>((localStorage.getItem("qgateway-language") as Language) || "zh");
+const storedLanguage = localStorage.getItem("qgateway-language") as Language | null;
+const language = ref<Language>(storedLanguage === "en" || storedLanguage === "zh" ? storedLanguage : "zh");
 const health = ref<Health | null>(null);
 const t = computed(() => dictionaries[language.value]);
 const navItems = computed(() => [
   { key: "dashboard" as const, label: t.value.nav.dashboard },
+  { key: "models" as const, label: t.value.nav.models },
   { key: "settings" as const, label: t.value.nav.settings },
   { key: "logs" as const, label: t.value.nav.logs },
 ]);

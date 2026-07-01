@@ -1,5 +1,6 @@
 ﻿from __future__ import annotations
 
+from datetime import datetime, timezone
 from time import monotonic
 
 from fastapi import APIRouter
@@ -42,7 +43,7 @@ def settings() -> dict[str, object]:
 @router.get("/models/scan")
 def models_scan() -> dict[str, object]:
     models = scan_models()
-    return {"count": len(models), "models": models}
+    return {"count": len(models), "scan_time": datetime.now(timezone.utc).isoformat(), "models": models}
 
 
 @router.get("/launcher/detect")
@@ -55,3 +56,5 @@ def launcher_detect() -> dict[str, object]:
 def logs(limit: int = 200) -> dict[str, object]:
     bounded_limit = max(1, min(limit, 1000))
     return {"lines": read_recent_logs(bounded_limit)}
+
+
