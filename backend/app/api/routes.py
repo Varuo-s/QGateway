@@ -5,6 +5,7 @@ from time import monotonic
 
 from fastapi import APIRouter
 
+from backend.app.clients.generator import generate_client_configs
 from backend.app.config.settings import get_settings
 from backend.app.launcher.detector import detect_launchers
 from backend.app.logging.logger import get_logger
@@ -52,6 +53,12 @@ def models_scan() -> dict[str, object]:
 def launcher_detect() -> dict[str, object]:
     candidates = detect_launchers()
     return {"candidates": candidates}
+
+
+@router.get("/clients/configs")
+def clients_configs() -> dict[str, object]:
+    configs = generate_client_configs()
+    return {"count": len(configs), "configs": configs}
 
 
 @router.get("/runtime/status")

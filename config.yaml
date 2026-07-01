@@ -1,7 +1,7 @@
 ﻿gateway:
   host: 127.0.0.1
   port: 4000
-  version: alpha-0.5
+  version: alpha-0.6
 logs:
   level: INFO
   file: logs/qgateway.log
@@ -22,5 +22,7 @@ runtime:
   host: 127.0.0.1
   port: 8080
   model_path: ../Models/QW.gguf
+
+
 
 

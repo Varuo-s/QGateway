@@ -120,3 +120,14 @@ def test_openai_responses_api_proxies_chat_completion(monkeypatch):
     assert captured["url"].endswith("/v1/chat/completions")
     assert captured["json"]["messages"] == [{"role": "user", "content": "hello"}]
 
+
+def test_clients_configs_api_shape():
+    client = TestClient(app)
+    response = client.get("/api/v1/clients/configs")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["count"] >= 4
+    ids = {item["id"] for item in payload["configs"]}
+    assert {"openai-sdk", "codex", "cline", "continue"}.issubset(ids)
+    assert all("http://127.0.0.1:4000/v1" in item["content"] for item in payload["configs"])
