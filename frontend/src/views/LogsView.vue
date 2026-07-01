@@ -1,18 +1,24 @@
 ﻿<template>
-  <el-card>
-    <template #header>
-      <div class="card-header">
-        <span>Logs</span>
-        <el-button size="small" @click="loadLogs">Refresh</el-button>
-      </div>
-    </template>
-    <pre class="log-viewer">{{ lines.join('\n') || 'No logs yet.' }}</pre>
-  </el-card>
+  <section class="glass-card feature-card">
+    <div class="section-title with-action">
+      <span>{{ labels.title }}</span>
+      <button class="glass-button" @click="loadLogs">{{ labels.refresh }}</button>
+    </div>
+    <pre class="log-viewer">{{ lines.join('\n') || labels.empty }}</pre>
+  </section>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { getJson } from "../api/client";
+
+defineProps<{
+  labels: {
+    title: string;
+    refresh: string;
+    empty: string;
+  };
+}>();
 
 const lines = ref<string[]>([]);
 
