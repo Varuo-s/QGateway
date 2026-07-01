@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class GatewaySettings(BaseModel):
@@ -28,11 +28,26 @@ class LauncherSettings(BaseModel):
 
 
 class RuntimeSettings(BaseModel):
+    @field_validator("flash_attention", "reasoning", "reasoning_format", "log_colors", mode="before")
+    @classmethod
+    def normalize_string_flags(cls, value: object) -> object:
+        if isinstance(value, bool):
+            return "on" if value else "off"
+        return value
+
     provider: str = "llama.cpp"
     executable: str = "../llama-server.exe"
-    host: str = "127.0.0.1"
-    port: int = 8080
     model_path: str = "../Models/QW.gguf"
+    alias: str = "Qwythos-9B"
+    host: str = "0.0.0.0"
+    port: int = 8999
+    gpu_layers: str = "all"
+    context_size: int = 16384
+    flash_attention: str = "auto"
+    reasoning: str = "off"
+    reasoning_format: str = "none"
+    log_colors: str = "off"
+    extra_args: list[str] = Field(default_factory=list)
 
 
 class Settings(BaseModel):
@@ -68,10 +83,26 @@ def load_settings(config_path: Path | None = None) -> Settings:
     return Settings(**raw, project_root=root)
 
 
+def save_runtime_settings(runtime_data: dict[str, Any]) -> Settings:
+    current = get_settings()
+    config_path = current.project_root / "config.yaml"
+    raw: dict[str, Any] = {}
+    if config_path.exists():
+        with config_path.open("r", encoding="utf-8") as config_file:
+            raw = yaml.safe_load(config_file) or {}
+
+    merged_runtime = {**current.runtime.model_dump(), **runtime_data}
+    runtime = RuntimeSettings(**merged_runtime)
+    raw["runtime"] = runtime.model_dump()
+
+    with config_path.open("w", encoding="utf-8") as config_file:
+        yaml.safe_dump(raw, config_file, allow_unicode=True, sort_keys=False)
+
+    get_settings.cache_clear()
+    return get_settings()
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return load_settings()
-
-
-
 

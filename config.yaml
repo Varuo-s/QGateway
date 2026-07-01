@@ -1,4 +1,4 @@
-﻿gateway:
+gateway:
   host: 127.0.0.1
   port: 4000
   version: alpha-0.6
@@ -7,22 +7,26 @@ logs:
   file: logs/qgateway.log
 models:
   scan_paths:
-    - ../Models
-    - Models
-    - models
-    - AI/Models
+  - ../Models
+  - Models
+  - models
+  - AI/Models
 launcher:
   executables:
-    - llama-server
-    - ollama
-    - lmstudio
+  - llama-server
+  - ollama
+  - lmstudio
 runtime:
   provider: llama.cpp
   executable: ../llama-server.exe
-  host: 127.0.0.1
-  port: 8080
   model_path: ../Models/QW.gguf
-
-
-
-
+  alias: Qwythos-9B
+  host: 0.0.0.0
+  port: 8999
+  gpu_layers: all
+  context_size: 16384
+  flash_attention: auto
+  reasoning: 'off'
+  reasoning_format: none
+  log_colors: 'off'
+  extra_args: []

@@ -6,7 +6,7 @@ from typing import Literal, TypedDict
 
 from pydantic import BaseModel
 
-from backend.app.config.settings import get_settings
+from backend.app.config.settings import RuntimeSettings, get_settings
 from backend.app.logging.logger import get_logger
 
 RuntimeState = Literal["stopped", "running", "error"]
@@ -29,8 +29,16 @@ class RuntimeStatus(TypedDict):
 
 class RuntimeStartRequest(BaseModel):
     model_path: str | None = None
+    alias: str | None = None
     host: str | None = None
     port: int | None = None
+    gpu_layers: str | None = None
+    context_size: int | None = None
+    flash_attention: str | None = None
+    reasoning: str | None = None
+    reasoning_format: str | None = None
+    log_colors: str | None = None
+    extra_args: list[str] | None = None
 
 
 class RuntimeManager:
@@ -38,20 +46,48 @@ class RuntimeManager:
         self._process: subprocess.Popen[str] | None = None
         self._error: str | None = None
 
-    def _runtime_settings(self):
+    def _runtime_settings(self) -> RuntimeSettings:
         return get_settings().runtime
 
     def _resolve(self, value: str) -> Path:
         return get_settings().resolve_path(value).resolve()
 
-    def build_command(self, request: RuntimeStartRequest | None = None) -> list[str]:
+    def _effective_runtime(self, request: RuntimeStartRequest | None = None) -> RuntimeSettings:
         runtime = self._runtime_settings()
+        if request is None:
+            return runtime
+        updates = request.model_dump(exclude_none=True)
+        return RuntimeSettings(**{**runtime.model_dump(), **updates})
+
+    def build_command(self, request: RuntimeStartRequest | None = None) -> list[str]:
+        runtime = self._effective_runtime(request)
         executable = self._resolve(runtime.executable)
-        model_value = request.model_path if request and request.model_path else runtime.model_path
-        model_path = self._resolve(model_value)
-        host = request.host if request and request.host else runtime.host
-        port = request.port if request and request.port else runtime.port
-        return [str(executable), "-m", str(model_path), "--host", host, "--port", str(port)]
+        model_path = self._resolve(runtime.model_path)
+        command = [
+            str(executable),
+            "-m",
+            str(model_path),
+            "-a",
+            runtime.alias,
+            "-ngl",
+            str(runtime.gpu_layers),
+            "-c",
+            str(runtime.context_size),
+            "--flash-attn",
+            runtime.flash_attention,
+            "--reasoning",
+            runtime.reasoning,
+            "--reasoning-format",
+            runtime.reasoning_format,
+            "--log-colors",
+            runtime.log_colors,
+            "--host",
+            runtime.host,
+            "--port",
+            str(runtime.port),
+        ]
+        command.extend(runtime.extra_args)
+        return command
 
     def status(self) -> RuntimeStatus:
         runtime = self._runtime_settings()

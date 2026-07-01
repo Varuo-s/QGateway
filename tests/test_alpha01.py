@@ -63,16 +63,24 @@ def test_runtime_status_api_shape():
     payload = response.json()
     assert payload["provider"] == "llama.cpp"
     assert payload["state"] in {"stopped", "running", "error"}
-    assert payload["host"] == "127.0.0.1"
+    assert payload["host"] in {"127.0.0.1", "0.0.0.0"}
     assert isinstance(payload["command"], list)
 
 
 def test_runtime_builds_llama_server_command():
-    command = runtime_manager.build_command(RuntimeStartRequest(model_path="../Models/QW.gguf", port=8090))
+    command = runtime_manager.build_command(RuntimeStartRequest(model_path="../Models/QW.gguf", host="0.0.0.0", port=8999))
 
     assert command[1] == "-m"
-    assert command[-2:] == ["--port", "8090"]
-    assert command[3:5] == ["--host", "127.0.0.1"]
+    assert "-a" in command
+    assert "Qwythos-9B" in command
+    assert command[command.index("-ngl") + 1] == "all"
+    assert command[command.index("-c") + 1] == "16384"
+    assert command[command.index("--flash-attn") + 1] == "auto"
+    assert command[command.index("--reasoning") + 1] == "off"
+    assert command[command.index("--reasoning-format") + 1] == "none"
+    assert command[command.index("--log-colors") + 1] == "off"
+    assert command[command.index("--host") + 1] == "0.0.0.0"
+    assert command[command.index("--port") + 1] == "8999"
 
 
 def test_openai_models_api_shape():
@@ -127,7 +135,21 @@ def test_clients_configs_api_shape():
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["count"] >= 4
+    assert payload["count"] >= 5
     ids = {item["id"] for item in payload["configs"]}
-    assert {"openai-sdk", "codex", "cline", "continue"}.issubset(ids)
+    assert {"openai-sdk", "codex", "cline", "claude-code", "continue"}.issubset(ids)
     assert all("http://127.0.0.1:4000/v1" in item["content"] for item in payload["configs"])
+
+
+def test_runtime_settings_update_api():
+    client = TestClient(app)
+    original = get_settings().runtime.model_dump()
+    response = client.put("/api/v1/settings/runtime", json={"host": "0.0.0.0", "port": 8999, "reasoning": "off"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["runtime"]["host"] == "0.0.0.0"
+    assert payload["runtime"]["port"] == 8999
+
+    client.put("/api/v1/settings/runtime", json=original)
+

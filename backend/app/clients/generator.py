@@ -43,61 +43,36 @@ def _toml(data: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _yaml(data: dict[str, object]) -> str:
-    lines: list[str] = []
-    for key, value in data.items():
-        if isinstance(value, dict):
-            lines.append(f"{key}:")
-            for child_key, child_value in value.items():
-                lines.append(f"  {child_key}: {child_value}")
-        else:
-            lines.append(f"{key}: {value}")
-    return "\n".join(lines) + "\n"
-
-
 def generate_client_configs() -> list[ClientConfig]:
     base_url = _base_url()
     model = _model_id()
     api_key = "qgateway-local"
 
-    openai_sdk = {
-        "base_url": base_url,
-        "api_key": api_key,
-        "model": model,
-    }
+    openai_sdk = {"base_url": base_url, "api_key": api_key, "model": model}
     codex = {
         "model": model,
         "model_provider": "qgateway",
-        "providers": {
-            "qgateway": {
-                "name": "QGateway",
-                "base_url": base_url,
-                "env_key": "QGATEWAY_API_KEY",
-                "wire_api": "responses",
-            }
-        },
+        "providers": {"qgateway": {"name": "QGateway", "base_url": base_url, "env_key": "QGATEWAY_API_KEY", "wire_api": "responses"}},
     }
-    cline = {
-        "apiProvider": "openai-compatible",
-        "openAiBaseUrl": base_url,
-        "openAiApiKey": api_key,
-        "openAiModelId": model,
+    cline = {"apiProvider": "openai-compatible", "openAiBaseUrl": base_url, "openAiApiKey": api_key, "openAiModelId": model}
+    claude_code = {
+        "ANTHROPIC_BASE_URL": base_url,
+        "ANTHROPIC_AUTH_TOKEN": api_key,
+        "ANTHROPIC_MODEL": model,
+        "note": "Use QGateway as an OpenAI-compatible local endpoint when the client supports custom base URLs.",
     }
-    continue_config = {
-        "models": [
-            {
-                "title": "QGateway",
-                "provider": "openai",
-                "model": model,
-                "apiBase": base_url,
-                "apiKey": api_key,
-            }
-        ]
-    }
+    continue_yaml = f"""models:
+  - title: QGateway
+    provider: openai
+    model: {model}
+    apiBase: {base_url}
+    apiKey: {api_key}
+"""
 
     return [
         {"id": "openai-sdk", "name": "OpenAI SDK", "format": "json", "filename": "openai-sdk.json", "content": _json(openai_sdk)},
         {"id": "codex", "name": "Codex", "format": "toml", "filename": "codex-qgateway.toml", "content": _toml(codex)},
         {"id": "cline", "name": "Cline", "format": "json", "filename": "cline-qgateway.json", "content": _json(cline)},
-        {"id": "continue", "name": "Continue", "format": "yaml", "filename": "continue-qgateway.yaml", "content": _yaml(continue_config)},
+        {"id": "claude-code", "name": "Claude Code", "format": "json", "filename": "claude-code-qgateway.json", "content": _json(claude_code)},
+        {"id": "continue", "name": "Continue", "format": "yaml", "filename": "continue-qgateway.yaml", "content": continue_yaml},
     ]

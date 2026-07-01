@@ -589,3 +589,30 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+.runtime-editor-grid {
+  display: grid;
+  grid-template-columns: 420px minmax(0, 1fr);
+  gap: 18px;
+}
+
+.parameter-panel select,
+.parameter-panel input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  color: #eff6ff;
+  background: rgba(255, 255, 255, 0.09);
+  outline: none;
+  padding: 10px 12px;
+}
+
+.parameter-panel option {
+  color: #0f172a;
+}
+
+@media (max-width: 1280px) {
+  .runtime-editor-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,11 +2,12 @@
 
 from datetime import datetime, timezone
 from time import monotonic
+from typing import Any
 
 from fastapi import APIRouter
 
 from backend.app.clients.generator import generate_client_configs
-from backend.app.config.settings import get_settings
+from backend.app.config.settings import get_settings, save_runtime_settings
 from backend.app.launcher.detector import detect_launchers
 from backend.app.logging.logger import get_logger
 from backend.app.runtime.manager import RuntimeStartRequest, runtime_manager
@@ -22,25 +23,19 @@ logger = get_logger("api")
 def health() -> dict[str, object]:
     settings = get_settings()
     logger.info("health check requested")
-    return {
-        "status": "ok",
-        "service": "QGateway",
-        "version": settings.gateway.version,
-        "runtime": "running",
-        "uptime_seconds": round(monotonic() - _started_at, 3),
-    }
+    return {"status": "ok", "service": "QGateway", "version": settings.gateway.version, "runtime": "running", "uptime_seconds": round(monotonic() - _started_at, 3)}
 
 
 @router.get("/settings")
 def settings() -> dict[str, object]:
     current = get_settings()
-    return {
-        "gateway": current.gateway.model_dump(),
-        "logs": current.logs.model_dump(),
-        "models": current.models.model_dump(),
-        "launcher": current.launcher.model_dump(),
-        "runtime": current.runtime.model_dump(),
-    }
+    return {"gateway": current.gateway.model_dump(), "logs": current.logs.model_dump(), "models": current.models.model_dump(), "launcher": current.launcher.model_dump(), "runtime": current.runtime.model_dump()}
+
+
+@router.put("/settings/runtime")
+def update_runtime_settings(payload: dict[str, Any]) -> dict[str, object]:
+    updated = save_runtime_settings(payload)
+    return {"runtime": updated.runtime.model_dump(), "status": runtime_manager.status()}
 
 
 @router.get("/models/scan")
