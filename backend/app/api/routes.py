@@ -8,6 +8,7 @@ from fastapi import APIRouter
 from backend.app.config.settings import get_settings
 from backend.app.launcher.detector import detect_launchers
 from backend.app.logging.logger import get_logger
+from backend.app.runtime.manager import RuntimeStartRequest, runtime_manager
 from backend.app.services.log_reader import read_recent_logs
 from backend.app.services.model_scanner import scan_models
 
@@ -37,6 +38,7 @@ def settings() -> dict[str, object]:
         "logs": current.logs.model_dump(),
         "models": current.models.model_dump(),
         "launcher": current.launcher.model_dump(),
+        "runtime": current.runtime.model_dump(),
     }
 
 
@@ -52,9 +54,22 @@ def launcher_detect() -> dict[str, object]:
     return {"candidates": candidates}
 
 
+@router.get("/runtime/status")
+def runtime_status() -> dict[str, object]:
+    return runtime_manager.status()
+
+
+@router.post("/runtime/start")
+def runtime_start(request: RuntimeStartRequest | None = None) -> dict[str, object]:
+    return runtime_manager.start(request)
+
+
+@router.post("/runtime/stop")
+def runtime_stop() -> dict[str, object]:
+    return runtime_manager.stop()
+
+
 @router.get("/logs")
 def logs(limit: int = 200) -> dict[str, object]:
     bounded_limit = max(1, min(limit, 1000))
     return {"lines": read_recent_logs(bounded_limit)}
-
-

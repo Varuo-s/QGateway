@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 class GatewaySettings(BaseModel):
     host: str = "127.0.0.1"
     port: int = 4000
-    version: str = "alpha-0.1"
+    version: str = "alpha-0.3"
 
 
 class LogSettings(BaseModel):
@@ -27,11 +27,20 @@ class LauncherSettings(BaseModel):
     executables: list[str] = Field(default_factory=lambda: ["llama-server", "ollama", "lmstudio"])
 
 
+class RuntimeSettings(BaseModel):
+    provider: str = "llama.cpp"
+    executable: str = "../llama-server.exe"
+    host: str = "127.0.0.1"
+    port: int = 8080
+    model_path: str = "../Models/QW.gguf"
+
+
 class Settings(BaseModel):
     gateway: GatewaySettings = Field(default_factory=GatewaySettings)
     logs: LogSettings = Field(default_factory=LogSettings)
     models: ModelSettings = Field(default_factory=ModelSettings)
     launcher: LauncherSettings = Field(default_factory=LauncherSettings)
+    runtime: RuntimeSettings = Field(default_factory=RuntimeSettings)
     project_root: Path
 
     def resolve_path(self, value: str) -> Path:
@@ -62,4 +71,3 @@ def load_settings(config_path: Path | None = None) -> Settings:
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return load_settings()
-

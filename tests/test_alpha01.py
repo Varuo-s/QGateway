@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 from backend.app.main import app
 from backend.app.config.settings import get_settings
+from backend.app.runtime.manager import RuntimeStartRequest, runtime_manager
 from backend.app.services.model_scanner import format_size, parse_quantization, scan_models
 
 
@@ -22,6 +23,7 @@ def test_settings_loads_project_config():
 
     assert settings.gateway.port == 4000
     assert settings.project_root.name == "QGateway"
+    assert settings.runtime.provider == "llama.cpp"
 
 
 def test_model_scanner_returns_list_without_required_directories():
@@ -51,3 +53,23 @@ def test_models_scan_api_shape():
     assert "count" in payload
     assert "scan_time" in payload
     assert "models" in payload
+
+
+def test_runtime_status_api_shape():
+    client = TestClient(app)
+    response = client.get("/api/v1/runtime/status")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["provider"] == "llama.cpp"
+    assert payload["state"] in {"stopped", "running", "error"}
+    assert payload["host"] == "127.0.0.1"
+    assert isinstance(payload["command"], list)
+
+
+def test_runtime_builds_llama_server_command():
+    command = runtime_manager.build_command(RuntimeStartRequest(model_path="../Models/QW.gguf", port=8090))
+
+    assert command[1] == "-m"
+    assert command[-2:] == ["--port", "8090"]
+    assert command[3:5] == ["--host", "127.0.0.1"]
