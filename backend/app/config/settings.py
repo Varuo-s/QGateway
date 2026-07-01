@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 class GatewaySettings(BaseModel):
     host: str = "127.0.0.1"
     port: int = 4000
-    version: str = "alpha-0.3"
+    version: str = "alpha-0.4"
 
 
 class LogSettings(BaseModel):
@@ -71,3 +71,4 @@ def load_settings(config_path: Path | None = None) -> Settings:
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return load_settings()
+

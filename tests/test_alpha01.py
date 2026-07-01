@@ -73,3 +73,50 @@ def test_runtime_builds_llama_server_command():
     assert command[1] == "-m"
     assert command[-2:] == ["--port", "8090"]
     assert command[3:5] == ["--host", "127.0.0.1"]
+
+
+def test_openai_models_api_shape():
+    client = TestClient(app)
+    response = client.get("/v1/models")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["object"] == "list"
+    assert isinstance(payload["data"], list)
+    assert payload["data"]
+    assert payload["data"][0]["object"] == "model"
+
+
+def test_openai_responses_api_proxies_chat_completion(monkeypatch):
+    import httpx
+    from backend.app.openai import routes as openai_routes
+
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, timeout):
+            self.timeout = timeout
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, traceback):
+            return False
+
+        def post(self, url, json):
+            captured["url"] = url
+            captured["json"] = json
+            return httpx.Response(200, request=httpx.Request("POST", url), json={"choices": [{"message": {"content": "hello from runtime"}}]})
+
+    monkeypatch.setattr(openai_routes.httpx, "Client", FakeClient)
+    client = TestClient(app)
+    response = client.post("/v1/responses", json={"input": "hello", "temperature": 0.1})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["object"] == "response"
+    assert payload["status"] == "completed"
+    assert payload["output_text"] == "hello from runtime"
+    assert captured["url"].endswith("/v1/chat/completions")
+    assert captured["json"]["messages"] == [{"role": "user", "content": "hello"}]
+

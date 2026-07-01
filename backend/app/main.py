@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.api.routes import router
+from backend.app.openai.routes import router as openai_router
 from backend.app.config.settings import get_settings
 from backend.app.logging.logger import get_logger
 
@@ -23,6 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(router)
+app.include_router(openai_router)
 
 frontend_dist = settings.project_root / "frontend" / "dist"
 if frontend_dist.exists():
@@ -38,4 +40,5 @@ def index():
 
 
 logger.info("QGateway backend initialized")
+
 
