@@ -1,0 +1,17 @@
+﻿gateway:
+  host: 127.0.0.1
+  port: 4000
+  version: alpha-0.1
+logs:
+  level: INFO
+  file: logs/qgateway.log
+models:
+  scan_paths:
+    - Models
+    - models
+    - AI/Models
+launcher:
+  executables:
+    - llama-server
+    - ollama
+    - lmstudio
